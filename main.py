@@ -5,6 +5,9 @@ from tkinter import messagebox
 from pymkv import MKVFile
 import extractSub
 import shutil
+import subprocess
+
+
 def convert_srt(file_path):
     """使用 OpenCC 转换 SRT 文件中的文本"""
     try:
@@ -114,6 +117,18 @@ def process_video():
 
     print(f"处理完成！最终文件：{final_video}")
 
+# 目标 exe 路径（注意路径写法）
+exe_path = r"C:\Users\xunicorn\Documents\高A\autoSubTitle\mkvInstall.exe"
 
+# 检查文件是否存在
+if not os.path.exists(exe_path):
+    print(f"错误：文件 {exe_path} 不存在！")
+else:
+    # 直接启动程序（完全模拟双击行为）
+    subprocess.run(
+        [exe_path],  # 使用列表形式避免 shell=True 的安全风险
+        shell=True,   # 允许系统解析路径和关联程序（关键！）
+        check=True    # 检查程序是否成功启动
+    )
 # 运行程序
 process_video()

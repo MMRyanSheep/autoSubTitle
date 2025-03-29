@@ -7,9 +7,9 @@ import zipfile
 import shutil
 from tkinter import Tk, filedialog, messagebox
 import tkinter as tk
+from pymkv import MKVFile
 
 def check_ffmpeg():
-    """检查是否安装了 ffmpeg，如果没有，尝试自动安装"""
     try:
         # 尝试执行 ffmpeg 命令，检测是否已安装
         subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -17,41 +17,25 @@ def check_ffmpeg():
     except FileNotFoundError:
         return False  # 未安装
 
+
 def install_ffmpeg():
-    """自动安装 ffmpeg（下载并解压到指定目录）"""
-    try:
-        # 获取系统信息，决定下载版本
-        if sys.platform == "win32":
-            ffmpeg_url = "https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip"
-            download_dir = os.path.join(os.environ["USERPROFILE"], "ffmpeg")
+    print("FFmpeg 未安装，正在自动安装...(预计5-10分钟)")
+    # 下载 FFmpeg 官方 Windows 版
+    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+    download_path = os.path.join(os.environ["TEMP"], "ffmpeg.zip")
+    extract_dir = r"C:\ffmpeg"
 
-            # 下载并解压 FFmpeg
-            zip_file = os.path.join(download_dir, "ffmpeg.zip")
-            if not os.path.exists(download_dir):
-                os.makedirs(download_dir)
+    # 下载并解压
+    urllib.request.urlretrieve(ffmpeg_url, download_path)
+    with zipfile.ZipFile(download_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_dir)
 
-            # 下载文件
-            urllib.request.urlretrieve(ffmpeg_url, zip_file)
+    # 将 FFmpeg 添加到系统 PATH
+    bin_path = os.path.join(extract_dir, "ffmpeg-*-essentials_build", "bin")
+    os.system(f'setx PATH "%PATH%;{bin_path}"')
 
-            # 解压文件
-            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-                zip_ref.extractall(download_dir)
+    print("FFmpeg 安装完成！")
 
-            # 删除压缩包
-            os.remove(zip_file)
-
-            # 将 ffmpeg 路径添加到系统环境变量
-            ffmpeg_bin_dir = os.path.join(download_dir, "ffmpeg-*/bin")
-            os.environ["PATH"] += os.pathsep + ffmpeg_bin_dir
-
-            messagebox.showinfo("FFmpeg 安装", "FFmpeg 已成功安装！")
-        else:
-            messagebox.showerror("错误", "目前仅支持 Windows 安装 FFmpeg。")
-            sys.exit(1)
-
-    except Exception as e:
-        messagebox.showerror("错误", f"安装 FFmpeg 时发生错误: {str(e)}")
-        sys.exit(1)
 
 def extract_subtitles(input_video, output_srt="subtitle.srt", output_video="no_subtitles.mkv"):
     # 检查是否安装 FFmpeg
@@ -60,11 +44,7 @@ def extract_subtitles(input_video, output_srt="subtitle.srt", output_video="no_s
         install_ffmpeg()
 
     # 获取当前程序目录
-    current_directory = os.getcwd()
-
     # 输出字幕文件的路径（统一保存为 .srt 格式）
-
-
     try:
         # 1. 提取字幕
         ffmpeg.input(input_video).output(output_srt, format="srt").run(overwrite_output=True)
@@ -76,6 +56,7 @@ def extract_subtitles(input_video, output_srt="subtitle.srt", output_video="no_s
 
     except ffmpeg.Error as e:
         print(f"处理失败: {e}")
+
 def select_file():
     """打开 Windows 文件资源管理器，选择文件"""
     root = tk.Tk()
