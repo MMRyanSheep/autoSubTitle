@@ -3,3 +3,4 @@ pysubs2
 opencc-python-reimplemented
 ffmpeg-python
 pymkv
+argostranslate
