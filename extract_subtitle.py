@@ -8,21 +8,14 @@ import shutil
 from tkinter import Tk, filedialog, messagebox
 import tkinter as tk
 from pymkv import MKVFile
-
-def check_ffmpeg():
-    try:
-        # 尝试执行 ffmpeg 命令，检测是否已安装
-        subprocess.run(["ffmpeg", "-version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return True  # 已安装
-    except FileNotFoundError:
-        return False  # 未安装
+import time
 
 
+'''
 def install_ffmpeg():
     print("FFmpeg 未安装，正在自动安装...(预计5-10分钟)")
     # 下载 FFmpeg 官方 Windows 版
-    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-    download_path = os.path.join(os.environ["TEMP"], "ffmpeg.zip")
+    ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" 
     extract_dir = r"C:\ffmpeg"
 
     # 下载并解压
@@ -56,9 +49,8 @@ def extract_subtitles(input_video, output_srt="subtitle.srt", output_video="no_s
 
     except ffmpeg.Error as e:
         print(f"处理失败: {e}")
-
+'''
 def select_file():
-    """打开 Windows 文件资源管理器，选择文件"""
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
     file_path = filedialog.askopenfilename(title="选择文件", filetypes=[("视频文件", "*.mkv;*.mp4;*.avi"), ("所有文件", "*.*")])
@@ -66,5 +58,6 @@ def select_file():
         print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
 
-final_path = select_file()
-extract_subtitles(final_path)
+video_path = select_file()
+output_path = "subtitle.srt"
+ffmpeg.input(video_path).output(output_path, codec = 'srt').run()
