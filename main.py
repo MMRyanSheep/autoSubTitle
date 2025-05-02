@@ -21,8 +21,8 @@ def remove_subtitles(input_video, output_video):
         print(f"已去除字幕：{output_video}")
     except ffmpeg.Error as e:
         print(f"移除字幕失败: {e}")
-def process_video():
-    from_code, to_code = input("请输入翻译语言代码（例如：zh-CT）："), input("请输入目标语言代码（例如：zh-CN）：")
+def process_video(from_code, to_code):
+    #from_code, to_code = input("请输入翻译语言代码（例如：zh-CT）："), input("请输入目标语言代码（例如：zh-CN）：")
     translate_subtitle.trans_init(from_code, to_code)
 
     temp_video = "no_subtitles.mkv"
@@ -40,4 +40,4 @@ def process_video():
 
     print(f"处理完成！最终文件：{final_video}")
 
-process_video()
+#process_video()
