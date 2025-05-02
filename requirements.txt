@@ -4,3 +4,4 @@ opencc-python-reimplemented
 ffmpeg-python
 pymkv
 argostranslate
+pySide6
