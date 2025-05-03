@@ -27,8 +27,7 @@ def process_video(from_code, to_code):
 
     temp_video = "no_subtitles.mkv"
     final_video = "final_video.mkv"
-
-    final_path = extract_subtitle.select_file()
+    final_path = extract_subtitle.select_file()   # 选择输出文件名
     extract_subtitle.extract_subtitles(final_path)
     app.remove_subtitles(final_path, temp_video)  # 去除字幕，生成 no_subtitles.mkv
 
