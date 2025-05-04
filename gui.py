@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QPlainTextEdit
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QPlainTextEdit, QComboBox, QLabel
 import translate_subtitle, extract_subtitle, shutil
 from app import remove_subtitles, add_subtitles
 import extract_subtitle
@@ -8,19 +8,17 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕')
+        self.window.setWindowTitle('翻译字幕v0.1.3')
         #翻译（从）
-        self.textFrom = QPlainTextEdit(self.window)
-        self.textFrom.setPlaceholderText("请输入翻译语言代码（例如：zh-CT）")
+        self.textFrom = QComboBox(self.window)
+        self.textFrom.addItems(["zh-CN", "zh-CT", ])
         self.textFrom.move(10, 25)
-        self.textFrom.resize(150, 90)
-        self.textFrom.setPlainText("zh-CT")
+        self.textFrom.resize(90, 50)
         #翻译（到）
-        self.textTo = QPlainTextEdit(self.window)
-        self.textTo.setPlaceholderText("请输入目标语言代码（例如：zh-CN）")
+        self.textTo = QComboBox(self.window)
+        self.textTo.addItems(["zh-CN", "zh-CT", "en"])
         self.textTo.move(159, 25)
-        self.textTo.resize(150, 90)
-        self.textTo.setPlainText("zh-CN")
+        self.textTo.resize(90, 50)
         #选择输入文件按钮
         self.button = QPushButton('选择文件', self.window)     #选择翻译视频文件按钮
         self.button.move(380, 80)
@@ -33,13 +31,38 @@ class TranslateWindow():
         self.buttonStart = QPushButton('开始翻译', self.window)
         self.buttonStart.move(380, 220)
         self.buttonStart.clicked.connect(self.process_video)
+        #提示文本
+        self.textToCode = QLabel(self.window) #翻译（从）头顶文字
+        self.textToCode.setText("翻译语言代码：")
+        self.textToCode.move(10, 0)
+        self.textFromCode = QLabel(self.window) #翻译（到）头顶文字
+        self.textFromCode.setText("翻译语言代码：")
+        self.textFromCode.move(159, 0)
+        '''
+        self.textMentionV0 = QLabel(self.window) #v0.1.3前的提示文字
+        self.textMentionV0.setText("提示：v0.1.3之前版本之前第一个提示框只可使用zh-CN")
+        self.textMentionV0.move(10, 80)
+        self.textMentionV0.setStyleSheet("color: red;") 
+        self.textMentionV0.resize(300, 50)
+        self.textMentionV1 = QLabel(self.window) #v0.1.3前的提示文字
+        self.textMentionV1.setText("第二个提示框只能使用zh-CT")
+        self.textMentionV1.move(10, 100)
+        self.textMentionV1.setStyleSheet("color: red;") 
+        self.textMentionV1.resize(300, 50) 
+        #测试版独享
+        self.textMentionTest = QLabel(self.window)
+        self.textMentionTest.setText("测试版不代表最终品质")
+        self.textMentionTest.move(340, 360)
+        self.textMentionTest.setStyleSheet("color: red;") 
+        self.textMentionTest.resize(300, 50) 
+        '''
         #文件路径定义
         self.final_video = ''
         self.input_video = ''
     def process_video(self):
-        from_code = self.textFrom.toPlainText()
-        to_code = self.textTo.toPlainText()
-        translate_subtitle.trans_init(from_code, to_code)
+        from_code = self.textFrom.currentText()
+        to_code = self.textTo.currentText()
+        translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
 
         temp_video = "temp/no_subtitles.mkv"
         temp_subtitle = "temp/subtitle.srt"
