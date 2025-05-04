@@ -8,7 +8,7 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕v0.1.3 - pre1')
+        self.window.setWindowTitle('翻译字幕v0.1.3')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
         self.textFrom.addItems(["zh-CN", "zh-CT", ])
@@ -38,6 +38,7 @@ class TranslateWindow():
         self.textFromCode = QLabel(self.window) #翻译（到）头顶文字
         self.textFromCode.setText("翻译语言代码：")
         self.textFromCode.move(159, 0)
+        '''
         self.textMentionV0 = QLabel(self.window) #v0.1.3前的提示文字
         self.textMentionV0.setText("提示：v0.1.3之前版本之前第一个提示框只可使用zh-CN")
         self.textMentionV0.move(10, 80)
@@ -54,6 +55,7 @@ class TranslateWindow():
         self.textMentionTest.move(340, 360)
         self.textMentionTest.setStyleSheet("color: red;") 
         self.textMentionTest.resize(300, 50) 
+        '''
         #文件路径定义
         self.final_video = ''
         self.input_video = ''
