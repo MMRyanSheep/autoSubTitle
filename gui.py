@@ -11,12 +11,12 @@ class TranslateWindow():
         self.window.setWindowTitle('翻译字幕v0.1.3 - pre1')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
-        self.textFrom.addItems(["zh-CN", "zh-CT"])
+        self.textFrom.addItems(["zh-CN", "zh-CT", ])
         self.textFrom.move(10, 25)
         self.textFrom.resize(90, 50)
         #翻译（到）
         self.textTo = QComboBox(self.window)
-        self.textTo.addItems(["zh-CN", "zh-CT"])
+        self.textTo.addItems(["zh-CN", "zh-CT", "en"])
         self.textTo.move(159, 25)
         self.textTo.resize(90, 50)
         #选择输入文件按钮
@@ -38,12 +38,12 @@ class TranslateWindow():
         self.textFromCode = QLabel(self.window) #翻译（到）头顶文字
         self.textFromCode.setText("翻译语言代码：")
         self.textFromCode.move(159, 0)
-        self.textMentionV0 = QLabel(self.window) #v0.1.6前的提示文字
-        self.textMentionV0.setText("提示：v0.1.6之前版本之前第一个提示框只可使用zh-CN")
+        self.textMentionV0 = QLabel(self.window) #v0.1.3前的提示文字
+        self.textMentionV0.setText("提示：v0.1.3之前版本之前第一个提示框只可使用zh-CN")
         self.textMentionV0.move(10, 80)
         self.textMentionV0.setStyleSheet("color: red;") 
         self.textMentionV0.resize(300, 50)
-        self.textMentionV1 = QLabel(self.window) #v0.1.6后的提示文字
+        self.textMentionV1 = QLabel(self.window) #v0.1.3前的提示文字
         self.textMentionV1.setText("第二个提示框只能使用zh-CT")
         self.textMentionV1.move(10, 100)
         self.textMentionV1.setStyleSheet("color: red;") 
@@ -60,7 +60,7 @@ class TranslateWindow():
     def process_video(self):
         from_code = self.textFrom.currentText()
         to_code = self.textTo.currentText()
-        translate_subtitle.trans_init(from_code, to_code)
+        translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
 
         temp_video = "temp/no_subtitles.mkv"
         temp_subtitle = "temp/subtitle.srt"

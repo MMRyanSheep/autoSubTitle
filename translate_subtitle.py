@@ -21,7 +21,8 @@ def trans_init(from_code, to_code):
             available_packages
         )
     )
-    argostranslate.package.install_from_path(package_to_install.download())
+    downLoad_path = package_to_install.download()
+    argostranslate.package.install_from_path(downLoad_path)
 
 def translator(from_code, to_code, text):
     # 执行翻译
@@ -32,6 +33,17 @@ def translate_subtitle(input_file, output_file, from_code, to_code):
     if from_code == 'zh-CT' and to_code == 'zh-CN':
         ct2cn(input_file, output_file)
         return
+    # 检查语言包是否已安装
+    #trans_init(stdIn(from_code), stdIn(to_code))
+    installed_languages = argostranslate.translate.get_installed_languages()
+    from_lang = list(filter(
+            lambda x: x.code == stdIn(from_code),
+            installed_languages))[0]
+    to_lang = list(filter(
+            lambda x: x.code == stdIn(to_code),
+            installed_languages))[0]
+    translation = from_lang.get_translation(to_lang)
+
     with open(input_file, "r", encoding="utf-8") as file:
         lines = file.readlines()
 
@@ -40,7 +52,7 @@ def translate_subtitle(input_file, output_file, from_code, to_code):
     for line in lines:
         # 如果是字幕内容行，进行转换
         if not line.strip().isdigit() and "-->" not in line and line.strip():
-            converted_line = argostranslate.translate.translate(line, from_code, to_code)
+            converted_line = translation.translate(line)
             converted_lines.append(converted_line + "\n")
         else:
             converted_lines.append(line)
@@ -67,3 +79,11 @@ def ct2cn(input_file, output_file):
     with open(output_file, "w", encoding="utf-8") as file:
         file.writelines(converted_lines)
     print(f"字幕已翻译: {output_file}")
+
+def stdIn(code):
+    if code == "zh-CT":
+        return "zt"
+    elif code == "zh-CN":
+        return "zh"
+    else:
+        return code
