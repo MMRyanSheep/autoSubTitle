@@ -33,8 +33,6 @@ def translate_subtitle(input_file, output_file, from_code, to_code):
     if from_code == 'zh-CT' and to_code == 'zh-CN':
         ct2cn(input_file, output_file)
         return
-    # 检查语言包是否已安装
-    #trans_init(stdIn(from_code), stdIn(to_code))
     installed_languages = argostranslate.translate.get_installed_languages()
     from_lang = list(filter(
             lambda x: x.code == stdIn(from_code),
