@@ -94,7 +94,7 @@ class TranslateWindow():
         print(f"处理完成！最终文件：{self.final_video}")
         shutil.rmtree('temp')
     def selectOutputPath(self):
-        self.final_video = extract_subtitle.select_file_for_gui(self.input_video[:-4], self.input_video[-4:])  #选择输出文件夹
+        self.final_video = extract_subtitle.select_file_for_gui(self.input_video[:-4], self.input_video[-3:])  #选择输出文件夹
     def selectInputFile(self):
         self.input_video = extract_subtitle.select_file()   #选择输入文件
     def blacklist(self, from_code, to_code):

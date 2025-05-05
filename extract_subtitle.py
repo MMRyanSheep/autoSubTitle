@@ -42,7 +42,7 @@ def select_file():
 def select_file_for_gui(defaultFile, intitialExt):
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
-    file_path = filedialog.asksaveasfilename(title="请选择输出位置", initialfile = defaultFile, defaultextension = intitialExt, filetypes=[("文本文档", "*.txt"), ("所有文件", "*.*")])
+    file_path = filedialog.asksaveasfilename(title="请选择输出位置", initialfile = defaultFile, defaultextension = intitialExt, filetypes=[("文本文档", "*.ass;*.mkv"), ("所有文件", "*.*")])
     if file_path:  # 确保用户选择了文件
         #print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
