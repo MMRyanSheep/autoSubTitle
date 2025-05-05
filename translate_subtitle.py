@@ -3,7 +3,8 @@ import argostranslate.package
 import argostranslate.translate
 from langDetect import detect_language
 from opencc import OpenCC
-def trans_init(from_code, to_code):
+def trans_init(from_lang, to_lang):
+    from_code, to_code = stdIn(from_lang), stdIn(to_lang)
     if from_code == to_code:
         print("翻译语言相同，无需翻译。")
         return
@@ -26,6 +27,7 @@ def trans_init(from_code, to_code):
     argostranslate.package.install_from_path(downLoad_path)
 
 def translator(from_code, to_code, text):
+    from_code, to_code = stdIn(from_code), stdIn(to_code)
     # 执行翻译
     translatedText = argostranslate.translate.translate(text, from_code, to_code)
     return translatedText

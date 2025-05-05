@@ -8,15 +8,35 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕v0.1.5-dev1')
+        self.window.setWindowTitle('翻译字幕v0.1.5-pre1')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
-        self.textFrom.addItems(["zh-CN", "zh-CT", ])
+        # 创建包含显示文本和对应值的元组列表
+        languages = [
+            ("简体中文", "zh-CN"),
+            ("繁体中文", "zh-CT"),
+            ("英文", "en"),
+            ("日文", "ja")
+        ]
+        # 添加带显示文本和数据的选项
+        for text, data in languages:
+            self.textFrom.addItem(text, data)
         self.textFrom.move(10, 25)
         self.textFrom.resize(90, 50)
         #翻译（到）
         self.textTo = QComboBox(self.window)
-        self.textTo.addItems(["zh-CN", "zh-CT", "en"])
+        # 创建包含显示文本和对应值的元组列表
+        languages = [
+            ("简体中文", "zh-CN"),
+            ("繁体中文", "zh-CT"),
+            ("英文", "en"),
+            ("日文", "ja")
+        ]
+
+        # 添加带显示文本和数据的选项
+        for text, data in languages:
+            self.textTo.addItem(text, data)  # 参数1是显示文本，参数2是关联数据
+
         self.textTo.move(159, 25)
         self.textTo.resize(90, 50)
         #选择输入文件按钮
@@ -42,7 +62,17 @@ class TranslateWindow():
         self.buttonExtract = QPushButton('提取字幕', self.window)
         self.buttonExtract.move(380, 290)
         self.buttonExtract.clicked.connect(self.extract_subtitles)
-        
+        #自定义文本（输入）
+        self.textInput = QPlainTextEdit(self.window)
+        self.textInput.move(10, 90)
+        self.textInput.resize(300, 50)
+        self.textInput.setPlaceholderText('请输入要翻译的文本')
+        #自定义文本（输出）
+        self.textOutput = QPlainTextEdit(self.window)
+        self.textOutput.move(10, 160)
+        self.textOutput.resize(300, 50)
+        self.textOutput.setReadOnly(True)
+        self.textOutput.setPlaceholderText('翻译文本输出')
         '''
         self.textMentionV0 = QLabel(self.window) #v0.1.3前的提示文字
         self.textMentionV0.setText("提示：v0.1.3之前版本之前第一个提示框只可使用zh-CN")
@@ -65,13 +95,21 @@ class TranslateWindow():
         self.final_video = ''
         self.input_video = ''
     def process_video(self):
+        print(self.textFrom.currentData(), self.textTo.currentData())
+        from_code = self.textFrom.currentData()
+        to_code = self.textTo.currentData()
+        if self.textInput.toPlainText() != '':  # 如果有要翻译的文本
+            if self.check(passFile = True):
+                return
+            else:
+                translate_subtitle.trans_init(from_code, to_code)
+                self.textOutput.setPlainText(translate_subtitle.translator(from_code, to_code, self.textInput.toPlainText()))
+                return
         if self.check():
             return
-        from_code = translate_subtitle.stdIn(self.textFrom.currentText())
-        to_code = translate_subtitle.stdIn(self.textTo.currentText())
         if self.input_video[-4:] == '.ass':  #如果是.ass文件
             if from_code != 'zt' and to_code != 'zh':
-                translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
+                translate_subtitle.trans_init(from_code, to_code)
                 translate_subtitle.translate_subtitle_ass(self.input_video, self.input_video, from_code, to_code)
                 return
             else:
@@ -101,25 +139,41 @@ class TranslateWindow():
     def selectInputFile(self):
         self.input_video = extract_subtitle.select_file()   #选择输入文件
     def blacklist(self):
-        if self.textFrom.currentText() == self.textTo.currentText():
+        if self.textTo == 'en':
+            return False
+        if self.textTo == 'zh-CN' and (self.textFrom != 'zh-CT' or self.textFrom != 'en'):
+            return False
+        whiteList = [('zh-CT', 'zh-CN'),
+                     ('zh-CN', 'en'),
+                     ('zh-CT', 'en'),
+                     ('en', 'ja'),
+                     ('ja', 'en'),
+                     ('en', 'zh-CN'),
+                     ('en', 'zh-CT')
+                     ]
+        if self.textFrom.currentData() == self.textTo.currentData():
             show_message('翻译语言代码不能相同！')
             return True
-        if self.textFrom.currentText() == 'zh' and self.textTo.currentText() == 'zt':
-            show_message('暂不支持繁体转简体， 请使用其他语言')
-            return True
+        for lang_from, lang_to in whiteList:
+            if self.textFrom.currentData() == lang_from and self.textTo.currentData() == lang_to:
+                return False
+            else:
+                show_message('暂不支持的翻译语言组合！')
+                return True
     def extract_subtitles(self):
         if self.check():
             return
         extract_subtitle.extract_subtitles(self.input_video, extract_subtitle.select_file_for_gui(defaultFile = self.input_video.split('/')[-1][:-4], intitialExt = '.srt'))
-    def check(self):
+    def check(self, passFile = False):
         if self.blacklist():
             return True
-        if self.input_video == '':
-            show_message('请先选择输入文件！')
-            return True
-        if self.final_video == '':
-            show_message('请先选择输出位置！')
-            return True
+        if not passFile:
+            if self.input_video == '':
+                show_message('请先选择输入文件！')
+                return True
+            if self.final_video == '':
+                show_message('请先选择输出位置！')
+                return True
 app = QApplication()
 window = TranslateWindow()
 window.window.show()
