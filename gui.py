@@ -8,7 +8,7 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕v0.1.3')
+        self.window.setWindowTitle('翻译字幕v0.1.4 - pre1')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
         self.textFrom.addItems(["zh-CN", "zh-CT", ])
