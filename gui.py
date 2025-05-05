@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QPlainTextEdit, QComboBox, QLabel
 import translate_subtitle, extract_subtitle, shutil
-from app import remove_subtitles, add_subtitles
+from app import remove_subtitles, add_subtitles, show_message
 import extract_subtitle
 class TranslateWindow():
     def __init__(self):
@@ -8,7 +8,7 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕v0.1.3')
+        self.window.setWindowTitle('翻译字幕v0.1.4 - pre1')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
         self.textFrom.addItems(["zh-CN", "zh-CT", ])
@@ -50,18 +50,35 @@ class TranslateWindow():
         self.textMentionV1.setStyleSheet("color: red;") 
         self.textMentionV1.resize(300, 50) 
         #测试版独享
+        '''
         self.textMentionTest = QLabel(self.window)
         self.textMentionTest.setText("测试版不代表最终品质")
         self.textMentionTest.move(340, 360)
         self.textMentionTest.setStyleSheet("color: red;") 
         self.textMentionTest.resize(300, 50) 
-        '''
         #文件路径定义
         self.final_video = ''
         self.input_video = ''
     def process_video(self):
-        from_code = self.textFrom.currentText()
-        to_code = self.textTo.currentText()
+        if self.input_video == '':
+            show_message('请先选择输入文件！')
+            return
+        if self.final_video == '':
+            show_message('请先选择输出位置！')
+            return
+        from_code = translate_subtitle.stdIn(self.textFrom.currentText())
+        to_code = translate_subtitle.stdIn(self.textTo.currentText())
+        if self.blacklist(from_code, to_code):
+            return
+        if self.input_video[-4:] == '.ass':  #如果是.ass文件
+            if from_code != 'zt' and to_code != 'zh':
+                translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
+                translate_subtitle.translate_subtitle_ass(self.input_video, self.input_video, from_code, to_code)
+                return
+            else:
+                translate_subtitle.ct2cn_ass(self.input_video, self.input_video, from_code)
+                return
+
         translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
 
         temp_video = "temp/no_subtitles.mkv"
@@ -77,10 +94,18 @@ class TranslateWindow():
         print(f"处理完成！最终文件：{self.final_video}")
         shutil.rmtree('temp')
     def selectOutputPath(self):
-        self.final_video = extract_subtitle.select_file_for_gui() + "/output.mkv"
+        self.final_video = extract_subtitle.select_file_for_gui(self.input_video[:-4], self.input_video[-3:])  #选择输出文件夹
     def selectInputFile(self):
-        self.input_video = extract_subtitle.select_file()
+        self.input_video = extract_subtitle.select_file()   #选择输入文件
+    def blacklist(self, from_code, to_code):
+        if from_code == to_code:
+            show_message('翻译语言代码不能相同！')
+            return True
+        if from_code == 'zh' and to_code == 'zt':
+            show_message('暂不支持繁体转简体， 请使用其他语言')
+            return True
     
+        
 app = QApplication()
 window = TranslateWindow()
 window.window.show()

@@ -35,14 +35,14 @@ def extract_subtitles(input_video, output_srt="subtitle.srt", output_video="no_s
 def select_file():
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
-    file_path = filedialog.askopenfilename(title="选择文件", filetypes=[("视频文件", "*.mkv;*.mp4;*.avi"), ("所有文件", "*.*")])
+    file_path = filedialog.askopenfilename(title="选择文件", filetypes=[("视频文件", "*.mkv;*.ass"), ("所有文件", "*.*")])
     if file_path:  # 确保用户选择了文件
         #print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
-def select_file_for_gui():
+def select_file_for_gui(defaultFile, intitialExt):
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
-    file_path = filedialog.askdirectory(title="请选择输出位置", initialdir="/")
+    file_path = filedialog.asksaveasfilename(title="请选择输出位置", initialfile = defaultFile, defaultextension = intitialExt, filetypes=[("文本文档", "*.ass;*.mkv"), ("所有文件", "*.*")])
     if file_path:  # 确保用户选择了文件
         #print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
