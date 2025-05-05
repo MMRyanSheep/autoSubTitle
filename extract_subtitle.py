@@ -42,18 +42,17 @@ def select_file():
 def select_file_for_gui(defaultFile, intitialExt):
     root = tk.Tk()
     root.withdraw()  # 隐藏主窗口
-    file_path = filedialog.asksaveasfilename(title="请选择输出位置", initialfile = defaultFile, defaultextension = intitialExt, filetypes=[("文本文档", "*.ass;*.mkv"), ("所有文件", "*.*")])
+    file_path = filedialog.asksaveasfilename(title="请选择输出位置", initialfile = defaultFile, defaultextension = intitialExt,  filetypes=[("文本文档", "*.ass;*.mkv;*.srt"), ("所有文件", "*.*")])
     if file_path:  # 确保用户选择了文件
         #print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
-def extract_subtitles(video_path):
+def extract_subtitles(video_path, output_path = "temp/subtitle.srt"):
     if video_path:
         try:
             shutil.rmtree('temp')  # 删除临时目录
         except:
             pass
         os.mkdir("temp")  # 创建临时目录
-        output_path = "temp/subtitle.srt"
         try:
             ffmpeg.input(video_path).output(output_path, codec = 'srt').run()
             print(f"字幕已提取: {output_path}")

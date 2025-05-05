@@ -8,7 +8,7 @@ class TranslateWindow():
         self.window = QMainWindow()
         self.window.resize(500, 400)
         self.window.move(300, 310)
-        self.window.setWindowTitle('翻译字幕v0.1.4 - pre1')
+        self.window.setWindowTitle('翻译字幕v0.1.5-dev1')
         #翻译（从）
         self.textFrom = QComboBox(self.window)
         self.textFrom.addItems(["zh-CN", "zh-CT", ])
@@ -38,6 +38,11 @@ class TranslateWindow():
         self.textFromCode = QLabel(self.window) #翻译（到）头顶文字
         self.textFromCode.setText("翻译语言代码：")
         self.textFromCode.move(159, 0)
+        #提取字幕按钮
+        self.buttonExtract = QPushButton('提取字幕', self.window)
+        self.buttonExtract.move(380, 290)
+        self.buttonExtract.clicked.connect(self.extract_subtitles)
+        
         '''
         self.textMentionV0 = QLabel(self.window) #v0.1.3前的提示文字
         self.textMentionV0.setText("提示：v0.1.3之前版本之前第一个提示框只可使用zh-CN")
@@ -50,7 +55,7 @@ class TranslateWindow():
         self.textMentionV1.setStyleSheet("color: red;") 
         self.textMentionV1.resize(300, 50) 
         #测试版独享
-        '''
+        ''' 
         self.textMentionTest = QLabel(self.window)
         self.textMentionTest.setText("测试版不代表最终品质")
         self.textMentionTest.move(340, 360)
@@ -60,16 +65,10 @@ class TranslateWindow():
         self.final_video = ''
         self.input_video = ''
     def process_video(self):
-        if self.input_video == '':
-            show_message('请先选择输入文件！')
-            return
-        if self.final_video == '':
-            show_message('请先选择输出位置！')
+        if self.check():
             return
         from_code = translate_subtitle.stdIn(self.textFrom.currentText())
         to_code = translate_subtitle.stdIn(self.textTo.currentText())
-        if self.blacklist(from_code, to_code):
-            return
         if self.input_video[-4:] == '.ass':  #如果是.ass文件
             if from_code != 'zt' and to_code != 'zh':
                 translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
@@ -78,6 +77,10 @@ class TranslateWindow():
             else:
                 translate_subtitle.ct2cn_ass(self.input_video, self.input_video, from_code)
                 return
+        if self.input_video[-4:] == '.srt':  #如果是.srt文件
+            translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
+            translate_subtitle.translate_subtitle(self.input_video, self.input_video, from_code, to_code)
+            return
 
         translate_subtitle.trans_init(translate_subtitle.stdIn(from_code), translate_subtitle.stdIn(to_code))
 
@@ -94,18 +97,29 @@ class TranslateWindow():
         print(f"处理完成！最终文件：{self.final_video}")
         shutil.rmtree('temp')
     def selectOutputPath(self):
-        self.final_video = extract_subtitle.select_file_for_gui(self.input_video[:-4], self.input_video[-3:])  #选择输出文件夹
+        self.final_video = extract_subtitle.select_file_for_gui(defaultFile = self.input_video.split('/')[-1][:-4], intitialExt = self.input_video[-3:])  #选择输出文件夹
     def selectInputFile(self):
         self.input_video = extract_subtitle.select_file()   #选择输入文件
-    def blacklist(self, from_code, to_code):
-        if from_code == to_code:
+    def blacklist(self):
+        if self.textFrom.currentText() == self.textTo.currentText():
             show_message('翻译语言代码不能相同！')
             return True
-        if from_code == 'zh' and to_code == 'zt':
+        if self.textFrom.currentText() == 'zh' and self.textTo.currentText() == 'zt':
             show_message('暂不支持繁体转简体， 请使用其他语言')
             return True
-    
-        
+    def extract_subtitles(self):
+        if self.check():
+            return
+        extract_subtitle.extract_subtitles(self.input_video, extract_subtitle.select_file_for_gui(defaultFile = self.input_video.split('/')[-1][:-4], intitialExt = '.srt'))
+    def check(self):
+        if self.blacklist():
+            return True
+        if self.input_video == '':
+            show_message('请先选择输入文件！')
+            return True
+        if self.final_video == '':
+            show_message('请先选择输出位置！')
+            return True
 app = QApplication()
 window = TranslateWindow()
 window.window.show()
