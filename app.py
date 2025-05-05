@@ -3,6 +3,8 @@ import ffmpeg
 from pymkv import MKVFile
 import os
 import shutil
+import tkinter as tk
+from tkinter import messagebox
 def remove_subtitles(input_video, output_video):
     """
     从视频中移除所有字幕
@@ -47,3 +49,19 @@ def add_subtitles(video_file, subtitle_file, output_file, back=False):
 
         shutil.move(output_file, final_video_path)  # 移动输出视频到原位置
         print(f"✅ 输出视频已移动到原位置：{final_video_path}")
+def show_message(message="暂不支持", title="提示"):
+    """弹窗提示函数
+    
+    Parameters:
+    message (str): 要显示的信息内容，默认"暂不支持 Python"
+    title (str): 窗口标题，默认"提示"
+    """
+    # 创建临时隐藏窗口
+    temp_root = tk.Tk()
+    temp_root.withdraw()
+    
+    # 显示信息对话框
+    messagebox.showinfo(title, message)
+    
+    # 立即销毁临时窗口
+    temp_root.destroy()
