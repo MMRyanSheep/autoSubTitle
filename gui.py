@@ -13,8 +13,8 @@ class TranslateWindow():
         self.textFrom = QComboBox(self.window)
         # 创建包含显示文本和对应值的元组列表
         languages = [
-            ("简体中文", "zh-CN"),
-            ("繁体中文", "zh-CT"),
+            ("简体中文", "zh"),
+            ("繁体中文", "zt"),
             ("英文", "en"),
             ("日文", "ja")
         ]
@@ -27,8 +27,8 @@ class TranslateWindow():
         self.textTo = QComboBox(self.window)
         # 创建包含显示文本和对应值的元组列表
         languages = [
-            ("简体中文", "zh-CN"),
-            ("繁体中文", "zh-CT"),
+            ("简体中文", "zh"),
+            ("繁体中文", "zt"),
             ("英文", "en"),
             ("日文", "ja")
         ]
@@ -94,16 +94,32 @@ class TranslateWindow():
         #文件路径定义
         self.final_video = ''
         self.input_video = ''
+        #queue功能实现
+        self.queue = []
+        self.textQueue = []
     def process_video(self):
         print(self.textFrom.currentData(), self.textTo.currentData())
         from_code = self.textFrom.currentData()
         to_code = self.textTo.currentData()
         if self.textInput.toPlainText() != '':  # 如果有要翻译的文本
-            if self.check(passFile = True):
+            if self.checkText():
+                cnt = 0
+                self.textQueue = [(self.textFrom.currentData(), 'en'), ('en', self.textTo.currentData())]  # 添加到列队 fromCode -> en -> toCode
+                for from_code, to_code in self.textQueue:
+                    print(from_code, to_code)
+                    if cnt == 0:
+                        translate_subtitle.trans_init(from_code, to_code)
+                        temp = translate_subtitle.translator(from_code, to_code, self.textInput.toPlainText())
+                    if cnt == 1:
+                        self.textOutput.setPlainText(translate_subtitle.translator(from_code, to_code, temp))
+                        break
+                    cnt += 1
                 return
-            else:
+            elif self.checkText() == False:
                 translate_subtitle.trans_init(from_code, to_code)
                 self.textOutput.setPlainText(translate_subtitle.translator(from_code, to_code, self.textInput.toPlainText()))
+                return
+            else:
                 return
         if self.check():
             return
@@ -139,17 +155,15 @@ class TranslateWindow():
     def selectInputFile(self):
         self.input_video = extract_subtitle.select_file()   #选择输入文件
     def blacklist(self):
-        if self.textTo == 'en':
+        if self.textTo == 'en' or self.textFrom == 'en':
             return False
-        if self.textTo == 'zh-CN' and (self.textFrom != 'zh-CT' or self.textFrom != 'en'):
-            return False
-        whiteList = [('zh-CT', 'zh-CN'),
-                     ('zh-CN', 'en'),
-                     ('zh-CT', 'en'),
+        whiteList = [('zt', 'zh'),
+                     ('zh', 'en'),
+                     ('zt', 'en'),
                      ('en', 'ja'),
                      ('ja', 'en'),
-                     ('en', 'zh-CN'),
-                     ('en', 'zh-CT')
+                     ('en', 'zh'),
+                     ('en', 'zt')
                      ]
         if self.textFrom.currentData() == self.textTo.currentData():
             show_message('翻译语言代码不能相同！')
@@ -158,15 +172,34 @@ class TranslateWindow():
             if self.textFrom.currentData() == lang_from and self.textTo.currentData() == lang_to:
                 return False
             else:
-                show_message('暂不支持的翻译语言组合！')
-                return True
+                self.queue = [(self.textFrom.currentData(), 'en'), ('en', self.textTo.currentData())]  #添加到列队 fromCode -> en -> toCode
+                print(self.queue)
+                self.translateQueue()
+                return False
+    def checkText(self):
+        if self.textTo == 'en' or self.textFrom == 'en':
+            print('yes')
+            return False
+        whiteList = [('zt', 'zh'),
+                     ('zh', 'en'),
+                     ('zt', 'en'),
+                     ('en', 'ja'),
+                     ('ja', 'en'),
+                     ('en', 'zh'),
+                     ('en', 'zt')
+                     ]
+        if self.textFrom.currentData() == self.textTo.currentData():
+            show_message('翻译语言代码不能相同！')
+            return 'man'
+        for lang_from, lang_to in whiteList:
+            if self.textFrom.currentData() == lang_from and self.textTo.currentData() == lang_to:
+                return False
+        return True
     def extract_subtitles(self):
         if self.check():
             return
         extract_subtitle.extract_subtitles(self.input_video, extract_subtitle.select_file_for_gui(defaultFile = self.input_video.split('/')[-1][:-4], intitialExt = '.srt'))
     def check(self, passFile = False):
-        if self.blacklist():
-            return True
         if not passFile:
             if self.input_video == '':
                 show_message('请先选择输入文件！')
@@ -174,6 +207,29 @@ class TranslateWindow():
             if self.final_video == '':
                 show_message('请先选择输出位置！')
                 return True
+        if self.blacklist():
+            return True
+    def translateQueue(self):
+        cnt = 0
+        temp_video = "temp/no_subtitles.mkv"
+        temp_subtitle = "temp/subtitle.srt"
+        temp_converted_subtitle = "temp/converted_subtitle.srt"
+        for from_code, to_code in self.queue:
+            print(from_code, to_code)
+            translate_subtitle.trans_init(from_code, to_code)
+            if cnt == 0:
+                extract_subtitle.extract_subtitles(self.input_video, queued = True)
+                remove_subtitles(self.input_video, temp_video) 
+            translate_subtitle.translate_subtitle(temp_subtitle, temp_converted_subtitle, from_code, to_code)
+            if cnt == 1:
+                add_subtitles(temp_video, temp_converted_subtitle, self.final_video)
+                cnt += 1
+                extract_subtitle.delTemp()
+                break
+            if cnt == 0:
+                temp_subtitle = temp_converted_subtitle
+                temp_converted_subtitle = "temp/converted_subtitle" + '_' + to_code + '_' + ".srt"  
+                cnt += 1         
 app = QApplication()
 window = TranslateWindow()
 window.window.show()
