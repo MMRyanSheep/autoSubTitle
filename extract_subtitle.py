@@ -46,16 +46,24 @@ def select_file_for_gui(defaultFile, intitialExt):
     if file_path:  # 确保用户选择了文件
         #print("选择的文件路径:", file_path)
         return file_path  # 返回文件路径
-def extract_subtitles(video_path, output_path = "temp/subtitle.srt"):
+def extract_subtitles(video_path, output_path = "temp/subtitle.srt", queued = False):
     if video_path:
         try:
-            shutil.rmtree('temp')  # 删除临时目录
+            delTemp()
         except:
             pass
-        os.mkdir("temp")  # 创建临时目录
-        try:
-            ffmpeg.input(video_path).output(output_path, codec = 'srt').run()
-            print(f"字幕已提取: {output_path}")
-        except:
-            print("提取字幕失败,请使用其他工具")
-            sys.exit(1)
+    try:
+        os.mkdir("temp")
+    except:
+        pass  # 创建临时目录
+    try:
+        ffmpeg.input(video_path).output(output_path, codec = 'srt').run()
+        print(f"字幕已提取: {output_path}")
+    except:
+        print("提取字幕失败,请使用其他工具")
+        sys.exit(1)
+def delTemp():
+    try:
+        shutil.rmtree('temp')  # 删除临时目录
+    except:
+        pass

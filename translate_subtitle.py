@@ -3,7 +3,8 @@ import argostranslate.package
 import argostranslate.translate
 from langDetect import detect_language
 from opencc import OpenCC
-def trans_init(from_code, to_code):
+def trans_init(from_lang, to_lang):
+    from_code, to_code = stdIn(from_lang), stdIn(to_lang)
     if from_code == to_code:
         print("翻译语言相同，无需翻译。")
         return
@@ -26,14 +27,12 @@ def trans_init(from_code, to_code):
     argostranslate.package.install_from_path(downLoad_path)
 
 def translator(from_code, to_code, text):
+    from_code, to_code = stdIn(from_code), stdIn(to_code)
     # 执行翻译
     translatedText = argostranslate.translate.translate(text, from_code, to_code)
     return translatedText
 
-def translate_subtitle(input_file, output_file, from_code, to_code):
-    if from_code == 'zt' and to_code == 'zh':
-        ct2cn(input_file, output_file)
-        return
+def translate_subtitle(input_file, output_file, from_code, to_code, queued = False):
     installed_languages = argostranslate.translate.get_installed_languages()
     from_lang = list(filter(
             lambda x: x.code == stdIn(from_code),
@@ -53,14 +52,13 @@ def translate_subtitle(input_file, output_file, from_code, to_code):
         # 如果是字幕内容行，进行转换
         if not line.strip().isdigit() and "-->" not in line and line.strip():
             converted_line = translation.translate(line)
-            converted_lines.append(converted_line + "\n")
+            converted_lines.append(converted_line)
         else:
             converted_lines.append(line)
     # 输出转换后的内容到新的文件
     with open(output_file, "w", encoding="utf-8") as file:
         file.writelines(converted_lines)
     print(f"字幕已翻译: {output_file}")
-
 def ct2cn(input_file, output_file):
     opencc = OpenCC('tw2s')
     with open(input_file, "r", encoding="utf-8") as file:
@@ -72,7 +70,7 @@ def ct2cn(input_file, output_file):
         # 如果是字幕内容行，进行转换
         if not line.strip().isdigit() and "-->" not in line and line.strip():
             converted_line = opencc.convert(line)
-            converted_lines.append(converted_line + "\n")
+            converted_lines.append(converted_line)
         else:
             converted_lines.append(line)
     # 输出转换后的内容到新的文件
@@ -119,8 +117,8 @@ def translate_subtitle_ass(input_file, output_file, from_code, to_code):
             converted_lines.append(line.split(lin)[0] + translation.translate(lin) + '\n')
     with open(output_file, "w", encoding="utf-8") as file:
         file.writelines(converted_lines)
-def ct2cn_ass(input_file, output_file, from_code):
-    opencc = OpenCC('tw2s')
+def ct2cn_ass(input_file, output_file, from_code, model = 'tw2s'):
+    opencc = OpenCC(model)
     with open(input_file, "r", encoding="utf-8") as file:
         lines = file.readlines()
     converted_lines = []
