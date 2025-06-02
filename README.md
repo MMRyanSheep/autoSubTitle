@@ -1,7 +1,7 @@
 # Auto subtitle tanslator / 字幕翻译
 **本项目基于argostranslate和opencc创建**  
 ### 此项目仅在python 3.12.0 环境测试正常  
-## (0.1.5-pre2 - 更新) 新增支持日文
+## (0.1.5-pre2 - 更新) 增加支持翻译语言组合
 ### 版本说明
 - 现在支持更多翻译语言组合
 
